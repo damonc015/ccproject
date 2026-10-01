@@ -3,68 +3,99 @@
 ```mermaid
 flowchart TB
     subgraph Client
-        Browser["Browser: code editor + interview UI"]
+        Browser["Browser: collaborative editor (CRDT client)"]
     end
 
     subgraph Auth
-        Cognito["Amazon Cognito"]
+        Cognito["Amazon Cognito (User Pool, JWT)"]
     end
 
-    subgraph Frontend Hosting
-        CF["CloudFront"] --> S3Static["S3: static SPA files"]
+    subgraph Hosting
+        CF["CloudFront"] --> S3Static["S3: static SPA files (OAC restricted)"]
     end
 
     subgraph API Layer
-        RESTAPI["API Gateway REST\n(create session, fetch question, submit final code)"]
-        WSAPI["API Gateway WebSocket\n(realtime interview events)"]
+        RESTAPI["API Gateway REST\n(document CRUD, permission grant/revoke)"]
+        WSAPI["API Gateway WebSocket\nconnect, disconnect, edit, comment, cursor, run"]
     end
 
     subgraph Compute
-        LambdaCRUD["Lambda: session/question CRUD"]
-        LambdaStream["Lambda: Bedrock call + stream chunks"]
-        LambdaTool["Lambda: tool-call handler (hints)"]
-        LambdaEval["Lambda: final evaluation"]
-    end
-
-    subgraph AI
-        Bedrock["Amazon Bedrock"]
+        LambdaCRUD["Lambda: document CRUD"]
+        LambdaPerm["Lambda: permission grant/revoke"]
+        LambdaConn["Lambda: $connect / $disconnect\n(permission check)"]
+        LambdaEdit["Lambda: edit relay (PostToConnection)"]
+        LambdaComment["Lambda: comment handler"]
+        LambdaSnapshot["Lambda: snapshot handler"]
+        LambdaRunTrigger["Lambda: run trigger"]
+        LambdaRunResult["Lambda: run result"]
     end
 
     subgraph Sandbox
-        Fargate["ECS Fargate: RunTask\n(isolated code execution, no internet egress)"]
+        Fargate["ECS Fargate: RunTask\nisolated sandbox, no internet egress"]
+    end
+
+    subgraph Events
+        EB["EventBridge rule\nECS Task State Change = STOPPED"]
     end
 
     subgraph Data
-        DDBSessions["DynamoDB: sessions, questions, live transcript"]
-        DDBConn["DynamoDB: WebSocket connections\n(sessionId -> connectionId)"]
-        S3Archive["S3: final transcript archive, oversized code, recordings"]
+        DDBDocs["DynamoDB: Documents"]
+        DDBPerm["DynamoDB: Permissions (GSI on userId)"]
+        DDBConn["DynamoDB: Connections"]
+        DDBVersion["DynamoDB: Version index"]
+        DDBComments["DynamoDB: Comments"]
+        S3Versions["S3: version snapshots (docId/versionId.json)"]
+    end
+
+    subgraph Observability
+        CWLogs["CloudWatch Logs\nLambda logs, Fargate task logs"]
+    end
+
+    subgraph Stretch
+        SES["SES: collaborator invite email"]
+        SQS["SQS: run-request buffer under load"]
+        Bedrock["Bedrock: AI code reviewer"]
     end
 
     Browser -->|sign in| Cognito
     Browser -->|HTTPS| CF
     Browser -->|REST calls| RESTAPI
-    Browser <-->|WS connect + messages| WSAPI
-
-    RESTAPI --> LambdaCRUD
-    LambdaCRUD --> DDBSessions
-
-    WSAPI -->|"$connect / $disconnect"| DDBConn
-    WSAPI -->|candidate message| LambdaStream
-    WSAPI -->|tool_use request| LambdaTool
-
-    LambdaStream --> Bedrock
-    LambdaStream -->|PostToConnection, using DDBConn| WSAPI
-    LambdaStream --> DDBSessions
-
-    LambdaTool --> Bedrock
-    LambdaTool --> DDBSessions
-    LambdaTool -->|run candidate code| Fargate
-    Fargate -->|result| LambdaTool
-
-    LambdaEval --> Bedrock
-    LambdaEval --> DDBSessions
-    LambdaEval --> S3Archive
+    Browser <-->|WS connect, edit, comment, run| WSAPI
 
     RESTAPI -.->|authorizer| Cognito
     WSAPI -.->|authorizer on $connect| Cognito
+
+    RESTAPI --> LambdaCRUD --> DDBDocs
+    RESTAPI --> LambdaPerm --> DDBPerm
+    LambdaPerm -.->|new collaborator email| SES
+
+    WSAPI --> LambdaConn --> DDBConn
+    LambdaConn --> DDBPerm
+
+    WSAPI --> LambdaEdit
+    LambdaEdit --> DDBConn
+    LambdaEdit -->|broadcast| WSAPI
+
+    WSAPI --> LambdaComment --> DDBComments
+    LambdaComment -->|broadcast| WSAPI
+
+    LambdaEdit -.->|periodic save| LambdaSnapshot
+    LambdaSnapshot --> S3Versions
+    LambdaSnapshot --> DDBVersion
+    LambdaSnapshot -.->|code review| Bedrock
+    Bedrock -.-> DDBVersion
+
+    WSAPI --> LambdaRunTrigger
+    LambdaRunTrigger -.->|under load| SQS
+    LambdaRunTrigger --> Fargate
+
+    Fargate --> CWLogs
+    Fargate -->|STOPPED| EB
+    EB --> LambdaRunResult
+    LambdaRunResult --> CWLogs
+    LambdaRunResult -->|result| WSAPI
+
+    LambdaCRUD --> CWLogs
+    LambdaConn --> CWLogs
+    LambdaEdit --> CWLogs
 ```
