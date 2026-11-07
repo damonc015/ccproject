@@ -2,6 +2,7 @@ import json
 import os
 import subprocess
 import sys
+from datetime import datetime, timezone
 
 MAX_TIMEOUT = 10
 MAX_OUTPUT = 20000
@@ -20,9 +21,49 @@ def clamp_timeout(raw):
 
 
 def cut(text):
+    if text is None:
+        return ""
     if len(text) <= MAX_OUTPUT:
         return text
     return text[:MAX_OUTPUT]
+
+
+def record(result):
+    print(json.dumps(result))
+    if os.environ.get("LOCAL_ONLY", "1") == "1":
+        return
+    table_name = os.environ.get("TABLE_NAME", "")
+    job_id = os.environ.get("JOB_ID", "")
+    if not table_name or not job_id:
+        return
+
+    import boto3
+    from botocore.exceptions import ClientError
+
+    table = boto3.resource("dynamodb").Table(table_name)
+    try:
+        table.update_item(
+            Key={"jobId": job_id},
+            UpdateExpression=(
+                "SET #s = :status, stdout = :out, stderr = :err, "
+                "exitCode = :code, #error = :error, finishedAt = :now"
+            ),
+            ConditionExpression="attribute_not_exists(#s) OR #s = :running",
+            ExpressionAttributeNames={"#s": "status", "#error": "error"},
+            ExpressionAttributeValues={
+                ":status": result["status"],
+                ":out": result["stdout"],
+                ":err": result["stderr"],
+                ":code": result["exitCode"],
+                ":error": result["error"],
+                ":running": "running",
+                ":now": datetime.now(timezone.utc).isoformat(),
+            },
+        )
+    except ClientError as exc:
+        code = exc.response.get("Error", {}).get("Code")
+        if code != "ConditionalCheckFailedException":
+            raise
 
 
 def main():
@@ -63,13 +104,13 @@ def main():
     except subprocess.TimeoutExpired as timed_out:
         result = {
             "status": "failed",
-            "stdout": cut(timed_out.stdout or ""),
-            "stderr": cut(timed_out.stderr or ""),
+            "stdout": cut(timed_out.stdout),
+            "stderr": cut(timed_out.stderr),
             "exitCode": 124,
             "error": "TIMEOUT",
         }
 
-    print(json.dumps(result))
+    record(result)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 FROM python:3.12-slim
 
-RUN useradd --create-home sandbox
+RUN pip install --no-cache-dir boto3 \
+ && useradd --create-home sandbox
 COPY runner.py /opt/runner.py
 
 USER sandbox

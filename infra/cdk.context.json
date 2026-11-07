@@ -1,0 +1,22 @@
+{
+  "availability-zones:account=521294962730:region=us-east-1": [
+    "us-east-1a",
+    "us-east-1b",
+    "us-east-1c",
+    "us-east-1d",
+    "us-east-1e",
+    "us-east-1f"
+  ],
+  "cc-api-provider:account=521294962730:expectedMatchCount=exactly-one:propertiesToReturn.0=PrefixListId:propertyMatch.PrefixListName=com.amazonaws.us-east-1.s3:region=us-east-1:typeName=AWS$:$:EC2$:$:PrefixList": [
+    {
+      "PrefixListId": "pl-63a5400a",
+      "Identifier": "pl-63a5400a"
+    }
+  ],
+  "cc-api-provider:account=521294962730:expectedMatchCount=exactly-one:propertiesToReturn.0=PrefixListId:propertyMatch.PrefixListName=com.amazonaws.us-east-1.dynamodb:region=us-east-1:typeName=AWS$:$:EC2$:$:PrefixList": [
+    {
+      "PrefixListId": "pl-02cd2c6b",
+      "Identifier": "pl-02cd2c6b"
+    }
+  ]
+}
