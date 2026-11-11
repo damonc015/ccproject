@@ -2,6 +2,7 @@ import express from 'express';
 import type { DatabaseSync } from 'node:sqlite';
 import { localAuth } from './auth/local.js';
 import { errorHandler, HttpError } from './errors.js';
+import { documentRoutes } from './documents/routes.js';
 
 export interface AppOptions {
   db: DatabaseSync;
@@ -28,6 +29,7 @@ export function createApp({ db, frontendOrigins = ['http://localhost:5173', 'htt
   app.get('/health', (_req, res) => res.json({ status: 'ok', mode: 'local' }));
   app.use(localAuth(db));
   app.use(express.json({ limit: '256kb' }));
+  app.use('/documents', documentRoutes(db));
   app.use((_req, _res) => { throw new HttpError(404, 'NOT_FOUND', 'Route not found.'); });
   app.use(errorHandler);
   return app;
