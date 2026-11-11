@@ -45,4 +45,12 @@ Working branch: `person3/local-api`, based on `ethan/frontend` (`255d5ff`).
 - Added setup, API examples, ownership handoff and remaining production decisions.
 - Integration validation so far: backend build/typecheck and 18 tests passed;
   frontend production build passed (existing large editor bundle warning remains).
-  Browser verification is next.
+- Browser verification complete: 2 Playwright/Chromium tests passed. Covered
+  creation, source save/reload, immutable preview, labelled run fixture, unregistered
+  email rejection, separate-user sharing, editor-to-viewer change, blocked editing,
+  disabled Viewer Run, revocation, deletion and inaccessible-document handling.
+- Added repeatable browser test configuration with separate ports and a fresh temp
+  database; updated architecture to distinguish local implementation from the old
+  cloud proposal. Added the local schema/access-path reference.
+- Local MVP scope is complete. Remaining work is the Person 1/2/4 production
+  integration listed in `person3-handoff.md`, not an unimplemented REST endpoint.

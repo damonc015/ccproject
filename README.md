@@ -5,6 +5,7 @@ to the existing frontend/execution work from `ethan/frontend`.
 
 - [Local setup and test accounts](docs/local-development.md)
 - [Person 3 REST contract](docs/person3-api.md)
+- [Local data model](docs/person3-data.md)
 - [Person 3 handoff and remaining integration](docs/person3-handoff.md)
 - [Implementation log](docs/person3-progress.md)
 - [Execution data contract](schemas/SCHEMAS.md)

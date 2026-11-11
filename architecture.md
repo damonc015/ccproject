@@ -1,5 +1,30 @@
 # Architecture
 
+## Current local Person 3 development
+
+See [local setup](docs/local-development.md), [REST contract](docs/person3-api.md)
+and [data model](docs/person3-data.md). The local stack below needs no AWS resources.
+
+```mermaid
+flowchart LR
+    UI[React / CodeMirror UI] --> HTTP[Person 3 Express REST API]
+    HTTP --> Auth[Local seeded identity and document permissions]
+    Auth --> DB[(SQLite)]
+    UI -. temporary editor bridge .-> Stub[Opt-in development collaboration stub]
+    Stub --> Auth
+    UI --> Mock[Yjs mock provider]
+```
+
+The stub does not run Python or synchronize different browsers. Replace it and
+the mock provider with Person 2's collaboration server for real collaboration.
+The read APIs expose Person 2/4 fixtures until those writers are integrated.
+
+## Earlier cloud proposal
+
+The following diagram is retained for historical context. It predates the current
+Hocuspocus/Fargate collaboration-server role split and is not the local implementation
+or the final deployment contract. Consult the team handoff documents before cloud work.
+
 ```mermaid
 flowchart TB
     subgraph Client

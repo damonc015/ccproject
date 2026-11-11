@@ -115,6 +115,21 @@ cd frontend
 npm run build
 ```
 
+For the Chromium browser smoke tests, first install backend/frontend dependencies
+as above, then run from `frontend`:
+
+```bash
+npx playwright install chromium
+npm run test:e2e
+```
+
+The suite builds/starts its own API on port 3002 and frontend on 5174, with a fresh
+temporary SQLite file. Those ports must be free. It uses separate browser contexts
+for owner/shared-user checks and stops its servers when finished. Failed runs save
+traces/screenshots under `frontend/test-results/` (gitignored). Temporary databases
+are left under the OS temp directory for diagnosis, not in your development DB.
+To use an installed Chromium, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` to its path.
+
 The backend tests use isolated temporary/in-memory databases. They do not mutate
 your development database. To start with entirely fresh demo data, stop the backend
 and use a new `DB_PATH` for both `db:seed` and `dev` rather than deleting data blindly.
