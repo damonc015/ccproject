@@ -1,6 +1,6 @@
 # Person 3 REST contract (local MVP)
 
-Status: implementation in progress. Based on `ethan/frontend` at `255d5ff`.
+Status: core REST endpoints implemented. Based on `ethan/frontend` at `255d5ff`.
 The frontend's `frontend/src/api/types.ts` defines the response DTOs. This
 document adds HTTP semantics; it does not replace Person 2's collaboration API.
 

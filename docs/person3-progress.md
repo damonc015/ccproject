@@ -34,3 +34,8 @@ Working branch: `person3/local-api`, based on `ethan/frontend` (`255d5ff`).
 - Validation after documents/sharing: build/typecheck and all 10 tests passed.
   Covered forged ownership, malformed/oversized input, role escalation, normalized
   email, unknown/unconfirmed recipients and immediate access revocation.
+- Read APIs complete: immutable version previews and normalized run status responses.
+  Reads enforce current membership and exact document/resource pairing; they do not
+  mutate jobs or expose internal task/source data.
+- Read API validation: build/typecheck and all 15 tests passed, including swapped
+  document IDs, missing jobs/versions, revocation, queued defaults and timeout results.
