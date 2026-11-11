@@ -39,3 +39,10 @@ Working branch: `person3/local-api`, based on `ethan/frontend` (`255d5ff`).
   mutate jobs or expose internal task/source data.
 - Read API validation: build/typecheck and all 15 tests passed, including swapped
   document IDs, missing jobs/versions, revocation, queued defaults and timeout results.
+- Local integration added: opt-in typed HTTP client, registered demo users, explicit
+  simulation notices and disabled Viewer execution. New server documents open via
+  the isolated `/dev` bridge rather than missing browser mock records.
+- Added setup, API examples, ownership handoff and remaining production decisions.
+- Integration validation so far: backend build/typecheck and 18 tests passed;
+  frontend production build passed (existing large editor bundle warning remains).
+  Browser verification is next.

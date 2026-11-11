@@ -82,11 +82,25 @@ Save version versus autosave snapshots before production integration.
 
 ## Local collaboration replacement
 
-An opt-in `/dev` namespace will keep the current editor usable before Person 2's
+An opt-in `/dev` namespace keeps the current editor usable before Person 2's
 server exists. It is not part of the production REST contract and must be disabled
 by default. It may store plain source text, create preview fixtures and create
 explicitly labelled synthetic run results. It never executes submitted code and
 does not provide cross-browser synchronization. It applies the same permissions.
+
+Set `ENABLE_COLLAB_STUB=true` to enable these routes:
+
+| Method and path | Body | Result | Access |
+|---|---|---|---|
+| `GET /dev/documents/:id/content` | none | `{content}`, empty for a new document | Viewer+ |
+| `PUT /dev/documents/:id/content` | `{content}` (max 100,000 characters) | 204 | Editor+ |
+| `POST /dev/documents/:id/versions` | `{label, content}` | 201 `VersionMeta` | Editor+ |
+| `POST /dev/documents/:id/runs` | `{code}` (max 7,000 characters) | 201 `{jobId}` | Editor+ |
+
+The run stub immediately stores a completed fixture with stdout explicitly stating
+that code was not executed. Invalid/oversized stub input returns 400; production
+execution error states remain governed by Person 4's contract. The content store
+uses whole-text replacement and is not safe for simultaneous collaborative saves.
 
 ## Integration ownership
 

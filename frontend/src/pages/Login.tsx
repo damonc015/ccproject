@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Navigate } from 'react-router-dom';
 import { DEMO_CONFIRM_CODE, DEMO_EMAIL, useAuth } from '../auth/AuthContext';
-import { USE_MOCK_AUTH } from '../config';
+import { USE_MOCK_AUTH, USE_LOCAL_API } from '../config';
 import { errMsg, useTheme } from '../util';
 
 type Mode = 'signin' | 'signup' | 'confirm';
@@ -60,9 +60,9 @@ export function Login() {
             <button type="button" role="tab" aria-selected={mode === 'signin'} onClick={() => switchTo('signin')}>
               Sign in
             </button>
-            <button type="button" role="tab" aria-selected={mode === 'signup'} onClick={() => switchTo('signup')}>
+            {!USE_LOCAL_API && <button type="button" role="tab" aria-selected={mode === 'signup'} onClick={() => switchTo('signup')}>
               Create account
-            </button>
+            </button>}
           </div>
         )}
 
@@ -110,7 +110,9 @@ export function Login() {
         </button>
 
         {mode === 'signin' && USE_MOCK_AUTH && (
-          <p className="hint center">Demo mode: the demo account is filled in. Any password of 8+ characters works.</p>
+          <p className="hint center">{USE_LOCAL_API
+            ? 'Local test accounts: demo@example.com, grace@example.com, linus@example.com, outsider@example.com. Any password of 8+ characters works. Registration is disabled in this mode.'
+            : 'Demo mode: the demo account is filled in. Any password of 8+ characters works.'}</p>
         )}
         {mode === 'confirm' && (
           <button type="button" className="btn ghost wide" onClick={() => switchTo('signup')}>

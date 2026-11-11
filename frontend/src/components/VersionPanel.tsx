@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { api, type VersionMeta } from '../api';
 import { errMsg, relTime } from '../util';
+import { USE_LOCAL_API } from '../config';
 
 interface Props {
   documentId: string;
@@ -71,7 +72,9 @@ export function VersionPanel({ documentId, canEdit, getCurrentText, onRestore }:
             Restore this version
           </button>
         )}
-        <p className="hint">Restoring is applied as a new edit, so collaborators see it live and nothing is lost.</p>
+        <p className="hint">{USE_LOCAL_API
+          ? 'Restoring replaces the local editor text. Live collaboration is simulated in this demo.'
+          : 'Restoring is applied as a new edit, so collaborators see it live and nothing is lost.'}</p>
       </div>
     );
   }

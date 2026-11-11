@@ -1,4 +1,5 @@
 import type { RunStatus } from '../api';
+import { USE_LOCAL_API } from '../config';
 
 const ERROR_TEXT: Record<string, string> = {
   NONZERO_EXIT: 'The program exited with an error.',
@@ -25,7 +26,7 @@ export function RunPanel({ run, requestError }: Props) {
   if (!run) {
     return (
       <div className="panel-body">
-        <div className="empty small">Press Run to execute the shared code in the sandbox. Output appears here.</div>
+        <div className="empty small">{USE_LOCAL_API ? 'Run creates a sample result for testing. Your code will not be executed.' : 'Press Run to execute the shared code in the sandbox. Output appears here.'}</div>
       </div>
     );
   }

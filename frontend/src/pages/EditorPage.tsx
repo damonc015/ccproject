@@ -7,6 +7,8 @@ import { Editor } from '../components/Editor';
 import { RunPanel } from '../components/RunPanel';
 import { ShareDialog } from '../components/ShareDialog';
 import { VersionPanel } from '../components/VersionPanel';
+import { LocalNotice } from '../components/LocalNotice';
+import { USE_LOCAL_API } from '../config';
 import { errMsg, useTheme } from '../util';
 
 const CONN_TEXT = { connecting: 'Connecting…', connected: 'Connected', disconnected: 'Disconnected' };
@@ -193,12 +195,15 @@ export function EditorPage() {
         <button className="btn" onClick={() => setSharing(true)}>
           Share
         </button>
-        <button className="btn primary" onClick={startRun} disabled={runBusy}>
+        <button className="btn primary" onClick={startRun} disabled={runBusy || (USE_LOCAL_API && !canEdit)}>
           {runBusy ? 'Running…' : '▶ Run'}
         </button>
       </header>
+      <LocalNotice />
 
-      {!canEdit && <div className="banner">You have view-only access. Edits by others still appear live.</div>}
+      {!canEdit && <div className="banner">{USE_LOCAL_API
+        ? 'You have view-only access. Reload to see saved changes from other test users.'
+        : 'You have view-only access. Edits by others still appear live.'}</div>}
 
       <div className="workspace">
         <Editor provider={provider} readOnly={!canEdit} dark={dark} fontSize={fontSize} />

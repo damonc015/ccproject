@@ -1,4 +1,5 @@
 import { getSessionUser, userIdFor } from '../auth/session';
+import { findRegisteredDemoUser } from '../auth/AuthContext';
 import {
   ApiError,
   type Api,
@@ -273,11 +274,13 @@ export const mockApi: Api = {
     const key = email.trim().toLowerCase();
     if (!/^\S+@\S+\.\S+$/.test(key)) throw new ApiError(400, 'Enter a valid email address.');
     if (role === 'owner') throw new ApiError(400, 'A document has exactly one owner.');
+    const registered = findRegisteredDemoUser(key);
+    if (!registered) throw new ApiError(404, 'No registered user has this email address.');
     const userId = userIdFor(key);
     if (userId === doc.ownerId) throw new ApiError(400, 'The owner already has full access.');
     const existing = doc.acl.find((c) => c.userId === userId);
     if (existing) existing.role = role;
-    else doc.acl.push({ userId, email: key, name: key.split('@')[0], role });
+    else doc.acl.push({ userId, email: key, name: registered.name, role });
     save(db);
     return doc.acl;
   },

@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import type { User } from '../api/types';
 import { getSessionUser, setSessionUser, userIdFor } from './session';
+import { USE_LOCAL_API } from '../config';
 
 // Mock of the Cognito flow: signUp -> confirmSignUp(code) -> signIn -> signOut.
 // The method names match what the real Cognito client will expose, so pages
@@ -19,12 +20,20 @@ interface StoredUser {
 function loadUsers(): Record<string, StoredUser> {
   let users: Record<string, StoredUser> = {};
   try {
-    users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
+    if (!USE_LOCAL_API) users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
   } catch {
     /* start fresh */
   }
-  if (!users[DEMO_EMAIL]) users[DEMO_EMAIL] = { email: DEMO_EMAIL, name: 'Demo User', confirmed: true };
+  // Matches backend/src/storage/seed.ts. Local API mode has no registration endpoint.
+  for (const [email, name] of [[DEMO_EMAIL, 'Demo User'], ['grace@example.com', 'Grace'], ['linus@example.com', 'Linus'], ['outsider@example.com', 'Outsider']]) {
+    if (!users[email]) users[email] = { email, name, confirmed: true };
+  }
   return users;
+}
+
+export function findRegisteredDemoUser(email: string) {
+  const user = loadUsers()[email.trim().toLowerCase()];
+  return user?.confirmed ? user : undefined;
 }
 
 const saveUsers = (u: Record<string, StoredUser>) => localStorage.setItem(USERS_KEY, JSON.stringify(u));
@@ -61,6 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         startSession(found);
       },
       async signUp(email, password, name) {
+        if (USE_LOCAL_API) throw new Error('Use a seeded test account in local API mode.');
         await wait(500);
         const key = email.trim().toLowerCase();
         if (!/^\S+@\S+\.\S+$/.test(key)) throw new Error('Enter a valid email address.');

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { api, type DocumentSummary } from '../api';
 import { useAuth } from '../auth/AuthContext';
 import { Modal } from '../components/Modal';
+import { LocalNotice } from '../components/LocalNotice';
 import { errMsg, relTime, useTheme } from '../util';
 
 type Filter = 'all' | 'mine' | 'shared';
@@ -76,6 +77,7 @@ export function Gallery() {
           Sign out
         </button>
       </header>
+      <LocalNotice />
 
       <main className="gallery">
         <div className="gallery-head">

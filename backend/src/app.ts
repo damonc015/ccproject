@@ -5,6 +5,7 @@ import { errorHandler, HttpError } from './errors.js';
 import { documentRoutes } from './documents/routes.js';
 import { versionRoutes } from './versions/routes.js';
 import { runRoutes } from './runs/routes.js';
+import { devRoutes } from './dev/routes.js';
 
 export interface AppOptions {
   db: DatabaseSync;
@@ -12,7 +13,7 @@ export interface AppOptions {
   enableCollabStub?: boolean;
 }
 
-export function createApp({ db, frontendOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'] }: AppOptions) {
+export function createApp({ db, frontendOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'], enableCollabStub = false }: AppOptions) {
   const app = express();
   app.disable('x-powered-by');
   app.use((req, res, next) => {
@@ -34,6 +35,7 @@ export function createApp({ db, frontendOrigins = ['http://localhost:5173', 'htt
   app.use('/documents', documentRoutes(db));
   app.use('/documents', versionRoutes(db));
   app.use('/documents', runRoutes(db));
+  if (enableCollabStub) app.use('/dev', devRoutes(db));
   app.use((_req, _res) => { throw new HttpError(404, 'NOT_FOUND', 'Route not found.'); });
   app.use(errorHandler);
   return app;
