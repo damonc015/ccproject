@@ -24,3 +24,7 @@ Working branch: `person3/local-api`, based on `ethan/frontend` (`255d5ff`).
 - Existing frontend IDs and execution field names are retained.
 - `RunStatus` remains owned by the existing infrastructure definition; local
   storage is a test adapter, not a second cloud table.
+- Foundation complete: Node 24 native SQLite, Express/TypeScript, schema versioning,
+  repeatable seed, local identity and controlled CORS. Production startup is rejected.
+- Foundation validation: build and typecheck passed; 3 tests passed, including
+  persistence across database reopen and preservation of revoked access on reseed.

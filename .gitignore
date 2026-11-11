@@ -1,2 +1,6 @@
 infra/node_modules/
 infra/cdk.out/
+backend/node_modules/
+backend/dist/
+backend/.data/
+backend/.env
