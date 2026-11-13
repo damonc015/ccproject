@@ -4,7 +4,7 @@
 
 Local-only API, persistent SQLite data, registered-user sharing, version previews,
 run status, and an opt-in frontend connection. No AWS deployment or real execution.
-Working branch: `person3/local-api`, based on `ethan/frontend` (`255d5ff`).
+Working branch: `yeji/local-api`, based on `ethan/frontend` (`255d5ff`).
 
 ## Commit-sized steps
 
@@ -54,3 +54,5 @@ Working branch: `person3/local-api`, based on `ethan/frontend` (`255d5ff`).
   cloud proposal. Added the local schema/access-path reference.
 - Local MVP scope is complete. Remaining work is the Person 1/2/4 production
   integration listed in `person3-handoff.md`, not an unimplemented REST endpoint.
+- Renamed the working branch to `yeji/local-api` at Yeji's request; the six
+  implementation commits are preserved unchanged.
